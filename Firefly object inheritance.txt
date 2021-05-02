@@ -1,0 +1,156 @@
+let a = 0;
+let flyLightMAX = 255;
+let freeBugs;
+let jarBugs;
+let releasedBugs;
+let currentFly;
+let onFly = false;
+
+let Firefly = function(position, s, value) {
+  this.acceleration = createVector(-0.5, 0.5);
+  this.velocity = createVector(0.3, 0.3);
+  this.position = position;
+  this.s = random(20000);
+  this.value = 0;
+};
+
+Firefly.prototype.display = function() {
+	noStroke();
+	fill(255, 255, 0, a);
+	ellipse(this.position.x, this.position.y, 5, 2);
+}
+
+Firefly.prototype.update = function() {
+  let move = createVector(random(-15, 15), random(-15, 15));
+  this.acceleration.add(move);
+  this.velocity.add(this.acceleration);
+  this.velocity.limit(0.3);
+  this.position.add(this.velocity);
+};
+
+Firefly.prototype.shine = function() {
+	this.value += 1;
+	a = ((sin(radians(this.value)) + 1) / 2) * flyLightMAX;
+}
+
+Firefly.prototype.run = function() {
+    this.display();
+    this.update();
+	this.shine();
+}
+
+function freeFirefly(position, s, value) {
+	Firefly.call(this, position);
+}
+
+freeFirefly.prototype = Object.create(Firefly.prototype);
+
+freeFirefly.prototype.update = function() {
+	Firefly.prototype.update.call(this);
+}
+
+freeFirefly.prototype.shine = function() {
+	Firefly.prototype.shine.call(this);
+}
+
+freeFirefly.prototype.display = function() {
+	Firefly.prototype.display.call(this);
+}
+
+freeFirefly.prototype.checkEdges = function() {
+  if (this.position.x > width) {
+    this.position.x = 0;
+  } else if (this.position.x < 0) {
+    this.position.x = width;
+  } else if (this.position.y > 550) {
+    this.position.y = 250;
+  } else if (this.position.y < 250) {
+    this.position.y = 550;
+  }
+}
+
+freeFirefly.prototype.checkOnFly = function() {
+  if (mouseX > this.position.x - 20 &&
+    mouseX < this.position.x + 20 &&
+    mouseY > this.position.y - 20 &&
+    mouseY < this.position.y + 20
+  ) {
+    onFly = true;
+    currentFly = freeFireflies.indexOf(this);
+  } 
+}
+
+freeFirefly.prototype.run = function() {
+  if (millis() > this.s) {
+    Firefly.prototype.run.call(this);
+    this.checkEdges();
+    this.checkOnFly();
+  }
+};
+
+function jarFirefly(position, s, value) {
+	Firefly.call(this, position);
+}
+
+jarFirefly.prototype = Object.create(Firefly.prototype);
+
+jarFirefly.prototype.update = function() {
+	Firefly.prototype.update.call(this);
+}
+
+jarFirefly.prototype.shine = function() {
+	Firefly.prototype.shine.call(this);
+}
+
+jarFirefly.prototype.display = function() {
+	noStroke();
+	fill(255, 255, 0, a);
+	ellipse(this.position.x, this.position.y, 7, 4);
+	fill(192, 192, 192, a);
+	triangle(this.position.x, this.position.y - 6, random(this.position.x - 8, this.position.x - 6), random(this.position.y - 7, this.position.y - 4), this.position.x - 4, this.position.y - 6);
+	triangle(this.position.x, this.position.y - 6, random(this.position.x + 8, this.position.x + 6), random(this.position.y - 7, this.position.y - 4), this.position.x + 4, this.position.y - 6);
+}
+
+jarFirefly.prototype.checkEdges = function() {
+  if (this.position.x > 95) {
+    this.position.x = 90;
+  } else if (this.position.x < 25) {
+    this.position.x = 30;
+  } else if (this.position.y > 533) {
+    this.position.y = 528;
+  } else if (this.position.y < 433) {
+    this.position.y = 434;
+  }
+}
+
+jarFirefly.prototype.run = function() {
+	Firefly.prototype.run.call(this);
+    this.checkEdges();
+}	
+
+
+function outFirefly(position, s, value) {
+	Firefly.call(this, position);
+}
+
+outFirefly.prototype = Object.create(Firefly.prototype);
+
+outFirefly.prototype.update = function() {
+	Firefly.prototype.update.call(this);
+}
+
+outFirefly.prototype.shine = function() {
+	Firefly.prototype.shine.call(this);
+}
+
+outFirefly.prototype.display = function() {
+	Firefly.prototype.display.call(this);
+}
+
+outFirefly.prototype.run = function() {
+	Firefly.prototype.run.call(this);
+}
+
+let freeFireflies = [];
+let bugsInJar = [];
+let firefliesOut = [];	
