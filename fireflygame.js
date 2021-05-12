@@ -1,7 +1,3 @@
-//To do
-//Fix current timing so fireflies don't all shine on/off at once
-//Fix restart button so it fully restarts, including end text
-
 let bg;
 
 let currentFreeFly;
@@ -12,14 +8,14 @@ let currentTime = function() {
   return millis();
 }
 
-let lidOff = false;
-let doorOpen = false;
-let onFly = false;
-
 let stars = [];
 let freeFireflies = [];
 let bugsInJar = [];
 let firefliesOut = [];
+
+let lidOff;
+let doorOpen;
+let onFly;
 
 
 function preload() {
@@ -31,6 +27,16 @@ function setup() {
 
   image(bg, 0, 0);
 
+  resetSketch();
+  
+}
+
+function resetSketch() {
+  lidOff = false;
+  doorOpen = false;
+  onFly = false;
+  bugsInJar.length = 0;
+  stars.length = 0;
 
   h = new House(480, 320, 200, 190);
   windowUpperR = new Window(530, 240, 27, 48, '#000036');
@@ -55,7 +61,6 @@ function setup() {
   startText = new Text('catch the fireflies\nwatch the moon come up\nexplore...', 40, 220, 180);
 
   endText = new Text('you caught all the fireflies...\nnow let them ESCAPE', 40, 220, 180);
-
 }
 
 function draw() {
@@ -80,10 +85,6 @@ function draw() {
     bugsInJar[i].run();
   };
 
-  for (let i = 0; i < firefliesOut.length; i++) {
-    firefliesOut[i].run();
-  }
-
   for (let i = 0; i < stars.length; i++) {
     stars[i].shine();
     stars[i].display();
@@ -98,7 +99,7 @@ function draw() {
     endText.display();
   }
 
-  restartButton();
+  resetButton();
 
 }
 
@@ -123,19 +124,18 @@ function mouseClicked() {
   if (mouseY < 120) {
     stars.push(new Star(mouseX, mouseY));
   }
+  
+  if (lidOff && 
+      mouseX > 70 && 
+      mouseX < 140 && 
+      mouseY > 530 && 
+      mouseY < 545) {
+    lidOff = false;
+  }
 
   if (mouseX > 678 && mouseX < 740 &&
     mouseY > 510 && mouseY < 540) {
-    lidOff = false;
-    doorOpen = false;
-    onFly = false;
-    stars.length = 0;
-    bugsInJar.length = 0;
-    firefliesOut.length = 0;
-    for (let i = 0; i < 20; i++) {
-      timing = currentTime();
-      freeFireflies[i] = new freeFirefly(createVector(random(0, width), random(250, 550)));
-    }
+    resetSketch();
   }
 
 }
@@ -145,7 +145,7 @@ function keyPressed() {
     lidOff = true;
     for (let i = 0; i < 20; i++) {
       timing = currentTime();
-      firefliesOut.push(new outFirefly(createVector(random(20, 100), 390)));
+      freeFireflies.push(new freeFirefly(createVector(random(20, 100), 390)));
     }
   }
 }
@@ -169,12 +169,12 @@ Text.prototype.display = function() {
 
 }
 
-restartButton = function() {
+resetButton = function() {
   noStroke();
   fill(92, 172, 63, 200);
   rect(678, 510, 62, 30, 5);
   fill(250, 255, 255);
-  text('restart', 682, 528);
+  text('reset', 688, 528);
 }
 
 
@@ -605,10 +605,3 @@ jarFirefly.prototype.escape = function() {
     }
   }
 }
-
-function outFirefly(position, value, s) {
-  Firefly.call(this, position);
-  this.s = random(5000);
-}
-
-outFirefly.prototype = Object.create(Firefly.prototype);
